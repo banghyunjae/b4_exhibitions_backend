@@ -1,3 +1,4 @@
+from django.db.models import Count
 from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,13 +8,10 @@ from rest_framework.pagination import PageNumberPagination
 from .paginations import CustomPageNumberPagination
 
 from .models import Exhibition
-from reviews.models import Review
-from accompanies.models import Accompany
-from accompanies.serializers import AccompanySerializer
-from reviews.serializers import ReviewSerializer
 from .serializers import (
     ExhibitionSerializer,
     ExhibitionDetailSerializer,
+    TopFiveExhibitionSerializer,
 )
 
 from .recommend_ml import recommendation
@@ -144,3 +142,22 @@ class ExhibitionSearchView(APIView):
             pagination.get_paginated_response(serializer.data),
             status=status.HTTP_200_OK,
         )
+
+
+class PopularExhibitionView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get(self, request):  # 전시 좋아요 탑5 인기랭킹 조회
+        q = Q()
+        today = datetime.date.today()
+        # 현재 날짜 기준으로 예약 가능한 전시회만 보여주기
+        q.add(Q(start_date__lte=today), q.AND)
+        q.add(Q(end_date__gte=today), q.AND)
+        q.add(Q(svstatus="접수중"), q.AND)
+        exhibitions = (
+            Exhibition.objects.filter(q)
+            .annotate(total_likes=Count("likes"))
+            .order_by("-total_likes")[:5]
+        )
+        serializer = TopFiveExhibitionSerializer(exhibitions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
