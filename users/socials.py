@@ -18,7 +18,9 @@ GITHUB_API_SECRET = os.environ.get("GITHUB_API_SECRET")
 
 
 class KakaoSignin(APIView):
-    """카카오 소셜 로그인"""
+    """
+    카카오 소셜 로그인
+    """
 
     def get(self, request):
         return Response(KAKAO_API_KEY, status=status.HTTP_200_OK)
@@ -35,7 +37,9 @@ class KakaoSignin(APIView):
 
 
 class GoogleSignin(APIView):
-    """구글 소셜 로그인"""
+    """
+    구글 소셜 로그인
+    """
 
     def get(self, request):
         return Response(GOOGLE_API_KEY, status=status.HTTP_200_OK)
@@ -52,7 +56,9 @@ class GoogleSignin(APIView):
 
 
 class NaverSignin(APIView):
-    """네이버 소셜 로그인"""
+    """
+    네이버 소셜 로그인
+    """
 
     def get(self, request):
         return Response(NAVER_API_KEY, status=status.HTTP_200_OK)
@@ -69,7 +75,9 @@ class NaverSignin(APIView):
 
 
 class GithubSignin(APIView):
-    """깃헙 소셜 로그인"""
+    """
+    깃헙 소셜 로그인
+    """
 
     def get(self, request):
         return Response(GITHUB_API_KEY, status=status.HTTP_200_OK)
@@ -86,6 +94,9 @@ class GithubSignin(APIView):
 
 
 def get_social_user_data(auth_code, signin_type):
+    """
+    소셜 로그인 유저 정보를 가져옵니다.
+    """
     auth_code = auth_code
     if signin_type == "kakao":
         url = "https://kauth.kakao.com/oauth/token"
@@ -149,9 +160,7 @@ def get_social_user_data(auth_code, signin_type):
         response = requests.get(url, headers=headers)
         if response.status_code != 200:
             return None
-        user_data = response.json().get(
-            "response"
-        )  # Naver's user data is wrapped in a 'response' field
+        user_data = response.json().get("response")
         user_data["signin_type"] = signin_type
         return user_data
     elif signin_type == "github":
@@ -165,9 +174,7 @@ def get_social_user_data(auth_code, signin_type):
         response = requests.post(url, headers=headers, data=data)
         if response.status_code != 200:
             return None
-        access_token = response.text.split("&")[0].split("=")[
-            1
-        ]  # Github returns 'access_token' in text format
+        access_token = response.text.split("&")[0].split("=")[1]
         url = "https://api.github.com/user"
         headers = {"Authorization": f"token {access_token}"}
         response = requests.get(url, headers=headers)
@@ -181,6 +188,10 @@ def get_social_user_data(auth_code, signin_type):
 
 
 def social_signin(user_data):
+    """
+    소셜 로그인 유저를 생성하거나 가져옵니다.
+
+    """
     if user_data is None:
         return None, {"error": "잘못된 접근입니다"}
 
