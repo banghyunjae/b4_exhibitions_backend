@@ -48,9 +48,9 @@ class UserViewTest(APITestCase):
         cls.user = User.objects.create_user(**cls.user_data)
 
     def setUp(self):
-        self.access_token = self.client.post(
-            reverse("users:user-signin"), self.user_data
-        ).data["access"]
+        self.access_token = self.client.post(reverse("users:user-signin"), self.user_data).data[
+            "access"
+        ]
 
     # ------------------------마이페이지 테스트------------------------
     def test_mypage(self):
@@ -78,9 +78,33 @@ class UserViewTest(APITestCase):
         self.assertEqual(response.data, {"message": "탈퇴되었습니다."})
 
 
+# ------------------------소셜(카카오) 테스트------------------------
+class KakaoSigninTest(APITestCase):
+    def test_get_kakao(self):
+        url = reverse("users:kakao-signin")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
 # ------------------------소셜(구글)로그인 테스트------------------------
 class GoogleSigninTest(APITestCase):
     def test_get_goolge(self):
         url = reverse("users:google-signin")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+# ------------------------소셜(네이버)로그인 테스트------------------------
+class NaverSigninTest(APITestCase):
+    def test_get_naver(self):
+        url = reverse("users:naver-signin")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+# ------------------------소셜(깃허브)로그인 테스트------------------------
+class GithubSigninTest(APITestCase):
+    def test_get_github(self):
+        url = reverse("users:github-signin")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
