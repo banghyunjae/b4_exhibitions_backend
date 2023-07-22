@@ -45,7 +45,7 @@ class User(AbstractBaseUser):
     )
 
     nickname = models.CharField(max_length=100, unique=True, verbose_name="사용자 닉네임")
-    password = models.CharField(max_length=255, verbose_name="비밀번호")
+    social_id = models.CharField(max_length=255, null=True, blank=True)
 
     GENDER_CHOICES = [
         ("남성", "남성"),
@@ -62,7 +62,7 @@ class User(AbstractBaseUser):
     age = models.PositiveIntegerField(null=True, verbose_name="사용자 나이")
     bio = models.TextField(blank=True, null=True, verbose_name="사용자 자기소개")
     profile_image = models.ImageField(
-        upload_to="profile_images/", blank=True, null=True, verbose_name="사용자 프로필이미지"
+        upload_to="profile_images/%Y/%m/%d", blank=True, null=True, verbose_name="사용자 프로필이미지"
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="사용자 계정 생성일")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="사용자 정보 마지막 수정일")
@@ -72,16 +72,14 @@ class User(AbstractBaseUser):
         ("naver", "네이버"),
         ("kakao", "카카오"),
     ]
-    signin_type = models.CharField(
-        "로그인유형", max_length=10, choices=SIGNIN_TYPES, default="normal"
-    )
+    signin_type = models.CharField("로그인유형", max_length=10, choices=SIGNIN_TYPES, default="normal")
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 
     objects = UserManager()
 
-    USERNAME_FIELD = "email"  # 이걸로 로그인 하겠다 하는 필드. 들어가는 값은 unique=True 속성.
+    USERNAME_FIELD = "email"  # 이걸로 로그인 하겠다 하는 필드
     REQUIRED_FIELDS = ["nickname"]  # createsuperuser할때 어떤 필드들을 작성받을 지 적는 필드.
 
     def __str__(self):
