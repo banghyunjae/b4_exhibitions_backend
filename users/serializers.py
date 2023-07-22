@@ -7,6 +7,7 @@ from exhibitions.serializers import ExhibitionSerializer
 from exhibitions.models import Exhibition
 from datetime import datetime, date
 from django.db.models import Count
+from django.contrib.auth.password_validation import validate_password
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -29,6 +30,10 @@ class UserSerializer(serializers.ModelSerializer):
             user.set_password(password)  # 비밀번호 암호화
         user.save()
         return user
+
+    def validate_password(self, value):
+        validate_password(value)
+        return value
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -66,8 +71,6 @@ class UserMypageSerializer(serializers.ModelSerializer):
         # 유저가 좋아요 누른 전시회 id 가져오기
         exhibition_likes_list = [value["id"] for value in obj.exhibition_likes.values()]
 
-        return [
-            # 가져온 id를 바탕으로 serializer 진행
-            ExhibitionSerializer(get_object_or_404(Exhibition, id=exhibition_id)).data
-            for exhibition_id in exhibition_likes_list
-        ]
+        exhibitions = Exhibition.objects.filter(id__in=exhibition_likes_list)
+
+        return ExhibitionSerializer(exhibitions, many=True).data
